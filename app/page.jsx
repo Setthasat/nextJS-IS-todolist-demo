@@ -6,6 +6,7 @@ import Navbar from "./components/Navbar";
 export default function Home() {
   const [todo, setTodo] = useState([]);
 
+
   useEffect(() => {
     const tasks = JSON.parse(localStorage.getItem("tasks")) || [];
     setTodo(tasks);
