@@ -76,7 +76,7 @@ function HomeCard({ todo }) {
           </h1>
           {todayTasks.length === 0 ? (
             <p className="mt-[2rem] text-gray-500">
-              You don't have tasks for today :)
+              You do not have tasks for today :)
             </p>
           ) : (
             <>

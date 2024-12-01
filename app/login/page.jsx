@@ -1,12 +1,12 @@
-import React from 'react';
+import Link from "next/link";
 
-function page() {
+export default function LoginPage() {
     return (
-        <div className='h-screen w-screen flex flex-col justify-center items-center bg-gradient-to-b from-[#FFB114] to-[#FF4FCA]'>
-            <p className='text-white mb-4'>comming soon ...</p>
-            <a className='underline underline-offset-4 text-white' href='/'>Go back</a>
+        <div>
+            <h1>Login Page</h1>
+            <Link href="/">
+                <a>Go to Home</a>
+            </Link>
         </div>
     );
 }
-
-export default page;
