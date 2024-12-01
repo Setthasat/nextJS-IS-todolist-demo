@@ -1,32 +1,21 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link"; // Correct Next.js navigation
 
 function HomeCard({ todo }) {
   const router = useRouter();
 
-  // Get today's date in a readable format
   const [otherTasks, setOtherTasks] = useState([]);
   const [todayTasks, setTodayTasks] = useState([]);
-
-  // Search State
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredTasks, setFilteredTasks] = useState([]);
-
-  // Pagination State for today tasks (only show 2 tasks per page)
   const [currentPage, setCurrentPage] = useState(1);
+
   const tasksPerPage = 2;
 
-  // Filter today's tasks based on current page
-  const indexOfLastTask = currentPage * tasksPerPage;
-  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
-  const currentTodayTasks = todayTasks.slice(indexOfFirstTask, indexOfLastTask);
-
   useEffect(() => {
-    // Calculate today's date and format it to 'YYYY-MM-DD' (ISO format)
     const currentDate = new Date().toISOString().split("T")[0];
-
-    // Split tasks into today and others
     const todayFiltered = todo.filter((task) => task.deadline === currentDate);
     const otherFiltered = todo.filter((task) => task.deadline !== currentDate);
 
@@ -35,7 +24,6 @@ function HomeCard({ todo }) {
     setFilteredTasks(otherFiltered);
   }, [todo]);
 
-  // Debounced Search
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchTerm) {
@@ -50,10 +38,9 @@ function HomeCard({ todo }) {
       }
     }, 300);
 
-    return () => clearTimeout(timeout); // Cleanup timeout
+    return () => clearTimeout(timeout);
   }, [searchTerm, otherTasks]);
 
-  // Handle pagination change
   const nextPage = () => {
     if (currentPage < Math.ceil(todayTasks.length / tasksPerPage)) {
       setCurrentPage(currentPage + 1);
@@ -67,125 +54,110 @@ function HomeCard({ todo }) {
   };
 
   return (
-    <div className="bg-white absolute bottom-0 min-h-[70%] max-h-[80%] h-auto rounded-t-[4rem] w-screen">
-      {/* TODAY TASK (only show if there are tasks for today) */}
+    <div className="bg-white fixed bottom-0 min-h-[70%] max-h-[80%] w-full rounded-t-[4rem] shadow-lg overflow-y-auto">
+      {/* Today Tasks Section */}
       {todayTasks.length > 0 && (
-        <div className="flex flex-col justify-center items-center h-full w-full mb-[2rem]">
-          <h1 className="text-3xl mt-[1.75rem] flex justify-center items-center">
-            TODAY TASK
-          </h1>
+        <div className="flex flex-col items-center px-6 py-4">
+          <h1 className="text-3xl font-bold">Today Tasks</h1>
           {todayTasks.length === 0 ? (
-            <p className="mt-[2rem] text-gray-500">
-              You do not have tasks for today :)
-            </p>
+            <p className="text-gray-500 mt-4">No tasks for today!</p>
           ) : (
-            <>
-              <ul className="mt-4 grid grid-cols-2 gap-4 justify-center items-center transition-all duration-300 ease-in-out">
-                {currentTodayTasks.map((task, index) => (
-                  <li
+            <div className="mt-4 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {todayTasks
+                .slice(
+                  (currentPage - 1) * tasksPerPage,
+                  currentPage * tasksPerPage
+                )
+                .map((task, index) => (
+                  <div
                     key={index}
-                    className="bg-gray-200 w-[8rem] h-[8rem] p-4 rounded-lg shadow-md"
+                    className="bg-gray-100 p-4 rounded-lg shadow-md"
                   >
                     <h3 className="font-bold">{task.title}</h3>
                     <p className="text-sm text-gray-600">{task.description}</p>
-                    <span className="text-xs text-gray-500 block mb-2">
+                    <span className="text-xs text-gray-500 block">
                       Deadline: {task.deadline}
                     </span>
                     <button
                       onClick={() => router.push(`/task/${index}`)}
-                      className="text-blue-500 underline text-sm"
+                      className="text-blue-500 underline mt-2"
                     >
                       View Task
                     </button>
-                  </li>
+                  </div>
                 ))}
-              </ul>
+            </div>
+          )}
 
-              {/* Pagination Controls */}
-              <div className="flex justify-center gap-4 mt-4 items-center">
-                <button
-                  onClick={prevPage}
-                  className={`bg-gray-200 text-gray-700 rounded-full py-2 px-4 transition-all duration-300 ease-in-out ${currentPage === 1 ? "cursor-not-allowed opacity-50" : ""
-                    }`}
-                  disabled={currentPage === 1}
-                >
-                  Prev
-                </button>
-                <span className="text-sm text-gray-600">
-                  Page {currentPage} of {Math.ceil(todayTasks.length / tasksPerPage)}
-                </span>
-                <button
-                  onClick={nextPage}
-                  className={`bg-gray-200 text-gray-700 rounded-full py-2 px-4 transition-all duration-300 ease-in-out ${currentPage === Math.ceil(todayTasks.length / tasksPerPage)
-                    ? "cursor-not-allowed opacity-50"
-                    : ""
-                    }`}
-                  disabled={
-                    currentPage === Math.ceil(todayTasks.length / tasksPerPage)
-                  }
-                >
-                  Next
-                </button>
-              </div>
-            </>
+          {/* Pagination */}
+          {todayTasks.length > tasksPerPage && (
+            <div className="flex items-center gap-4 mt-4">
+              <button
+                onClick={prevPage}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg ${currentPage === 1
+                  ? "bg-gray-200 text-gray-500"
+                  : "bg-blue-500 text-white"
+                  }`}
+              >
+                Prev
+              </button>
+              <span>
+                Page {currentPage} of {Math.ceil(todayTasks.length / tasksPerPage)}
+              </span>
+              <button
+                onClick={nextPage}
+                disabled={currentPage === Math.ceil(todayTasks.length / tasksPerPage)}
+                className={`px-4 py-2 rounded-lg ${currentPage ===
+                  Math.ceil(todayTasks.length / tasksPerPage)
+                  ? "bg-gray-200 text-gray-500"
+                  : "bg-blue-500 text-white"
+                  }`}
+              >
+                Next
+              </button>
+            </div>
           )}
         </div>
       )}
 
-      {/* SEARCH & TASK CREATION */}
-      <div className="w-full h-full flex flex-col justify-center items-center mt-[4rem]">
-        <h2 className="mt-2 mb-4 text-3xl">All Tasks</h2>
-        <form>
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="focus:outline-none bg-gray-200 w-[18rem] h-[4rem] rounded-full px-[2rem]"
-            placeholder="Search Task"
-          />
-        </form>
+      {/* All Tasks Section */}
+      <div className="flex flex-col items-center px-6 py-4">
+        <h2 className="text-2xl font-bold">All Tasks</h2>
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search tasks..."
+          className="mt-4 px-4 py-2 w-full sm:w-1/2 border rounded-lg focus:outline-none"
+        />
         {filteredTasks.length === 0 ? (
-          <>
-            <p className="mt-[4rem] text-gray-500">
-              No tasks match your search :)
-            </p>
-            <a
-              className="underline underline-offset-4 text-blue-500"
-              href="/create"
-            >
-              Wanna create one?
-            </a>
-          </>
+          <p className="mt-4 text-gray-500">No tasks match your search!</p>
         ) : (
-          <>
-            <ul className="mt-4 space-y-2">
-              {filteredTasks.map((task, index) => (
-                <li
-                  key={index}
-                  className="bg-gray-200 w-[16rem] p-4 rounded-lg shadow-md"
+          <ul className="mt-4 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {filteredTasks.map((task, index) => (
+              <li
+                key={index}
+                className="bg-gray-100 p-4 rounded-lg shadow-md"
+              >
+                <h3 className="font-bold">{task.title}</h3>
+                <p className="text-sm text-gray-600">{task.description}</p>
+                <span className="text-xs text-gray-500 block">
+                  Deadline: {task.deadline}
+                </span>
+                <button
+                  onClick={() => router.push(`/task/${index}`)}
+                  className="text-blue-500 underline mt-2"
                 >
-                  <h3 className="font-bold">{task.title}</h3>
-                  <p className="text-sm text-gray-600">{task.description}</p>
-                  <span className="text-xs text-gray-500 block mb-2">
-                    Deadline: {task.deadline}
-                  </span>
-                  <button
-                    onClick={() => router.push(`/task/${index}`)}
-                    className="text-blue-500 underline text-sm"
-                  >
-                    View Task
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <a
-              className="underline underline-offset-4 text-blue-500 mt-4"
-              href="/create"
-            >
-              Wanna create more?
-            </a>
-          </>
+                  View Task
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
+        <Link href="/create" className="text-blue-500 underline mt-4">
+          Wanna create more?
+        </Link>
       </div>
     </div>
   );
