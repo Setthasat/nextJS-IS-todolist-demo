@@ -3,7 +3,7 @@ import { FaRegUserCircle } from "react-icons/fa";
 
 function Navbar() {
     return (
-        <div className="flex justify-between items-center p-[2rem] font-bold">
+        <div className="flex sticky justify-between items-center p-[2rem] font-bold">
             <Link href="/" className="text-3xl text-white underline underline-offset-8">
                 MEMO MATE
             </Link>
