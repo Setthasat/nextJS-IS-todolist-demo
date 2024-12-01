@@ -5,22 +5,28 @@ import { useRouter } from "next/navigation";
 function HomeCard({ todo }) {
   const router = useRouter();
 
+  // Get today's date in a readable format
   const [otherTasks, setOtherTasks] = useState([]);
   const [todayTasks, setTodayTasks] = useState([]);
 
+  // Search State
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredTasks, setFilteredTasks] = useState([]);
 
+  // Pagination State for today tasks (only show 2 tasks per page)
   const [currentPage, setCurrentPage] = useState(1);
   const tasksPerPage = 2;
 
+  // Filter today's tasks based on current page
   const indexOfLastTask = currentPage * tasksPerPage;
   const indexOfFirstTask = indexOfLastTask - tasksPerPage;
   const currentTodayTasks = todayTasks.slice(indexOfFirstTask, indexOfLastTask);
 
   useEffect(() => {
+    // Calculate today's date and format it to 'YYYY-MM-DD' (ISO format)
     const currentDate = new Date().toISOString().split("T")[0];
 
+    // Split tasks into today and others
     const todayFiltered = todo.filter((task) => task.deadline === currentDate);
     const otherFiltered = todo.filter((task) => task.deadline !== currentDate);
 
@@ -29,6 +35,7 @@ function HomeCard({ todo }) {
     setFilteredTasks(otherFiltered);
   }, [todo]);
 
+  // Debounced Search
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (searchTerm) {
@@ -43,16 +50,10 @@ function HomeCard({ todo }) {
       }
     }, 300);
 
-    return () => clearTimeout(timeout);
+    return () => clearTimeout(timeout); // Cleanup timeout
   }, [searchTerm, otherTasks]);
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
-
+  // Handle pagination change
   const nextPage = () => {
     if (currentPage < Math.ceil(todayTasks.length / tasksPerPage)) {
       setCurrentPage(currentPage + 1);
@@ -66,7 +67,8 @@ function HomeCard({ todo }) {
   };
 
   return (
-    <div className="bg-white fixed bottom-0 min-h-[70%] max-h-[80%] h-auto rounded-t-[4rem] w-screen">
+    <div className="bg-white absolute bottom-0 min-h-[70%] max-h-[80%] h-auto rounded-t-[4rem] w-screen">
+      {/* TODAY TASK (only show if there are tasks for today) */}
       {todayTasks.length > 0 && (
         <div className="flex flex-col justify-center items-center h-full w-full mb-[2rem]">
           <h1 className="text-3xl mt-[1.75rem] flex justify-center items-center">
@@ -99,12 +101,12 @@ function HomeCard({ todo }) {
                 ))}
               </ul>
 
+              {/* Pagination Controls */}
               <div className="flex justify-center gap-4 mt-4 items-center">
                 <button
                   onClick={prevPage}
-                  className={`bg-gray-200 text-gray-700 rounded-full py-2 px-4 transition-all duration-300 ease-in-out ${
-                    currentPage === 1 ? "cursor-not-allowed opacity-50" : ""
-                  }`}
+                  className={`bg-gray-200 text-gray-700 rounded-full py-2 px-4 transition-all duration-300 ease-in-out ${currentPage === 1 ? "cursor-not-allowed opacity-50" : ""
+                    }`}
                   disabled={currentPage === 1}
                 >
                   Prev
@@ -114,11 +116,10 @@ function HomeCard({ todo }) {
                 </span>
                 <button
                   onClick={nextPage}
-                  className={`bg-gray-200 text-gray-700 rounded-full py-2 px-4 transition-all duration-300 ease-in-out ${
-                    currentPage === Math.ceil(todayTasks.length / tasksPerPage)
-                      ? "cursor-not-allowed opacity-50"
-                      : ""
-                  }`}
+                  className={`bg-gray-200 text-gray-700 rounded-full py-2 px-4 transition-all duration-300 ease-in-out ${currentPage === Math.ceil(todayTasks.length / tasksPerPage)
+                    ? "cursor-not-allowed opacity-50"
+                    : ""
+                    }`}
                   disabled={
                     currentPage === Math.ceil(todayTasks.length / tasksPerPage)
                   }
@@ -131,6 +132,7 @@ function HomeCard({ todo }) {
         </div>
       )}
 
+      {/* SEARCH & TASK CREATION */}
       <div className="w-full h-full flex flex-col justify-center items-center mt-[4rem]">
         <h2 className="mt-2 mb-4 text-3xl">All Tasks</h2>
         <form>
